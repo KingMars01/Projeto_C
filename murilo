@@ -1,0 +1,299 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#define troca(A,B) {Item c = A; A = B; B = c;}
+
+typedef struct Item {
+
+    int chave_t;
+    float elementos;
+
+} Item;
+
+void Insertion_Sort(Item *v, int n){
+
+    int i,j;
+
+    //e troquei esse for pois nao estava lendo o vetor inteiro
+    for(i=0; i <= n; i++){
+        for(j=i; j>= 0; j--){
+            //apenas inverti o sinal de menor para maior
+            if(v[j-1].chave_t < v[j].chave_t){
+                troca(v[j-1],v[j]);
+            }
+        }
+    }
+}
+
+void Bubble_Sort_Decrescente(Item *v, int n) {
+    int i, j;
+
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (v[j].chave_t < v[j + 1].chave_t) {
+                troca(v[j], v[j + 1]);
+            }
+        }
+    }
+}
+
+void Shell_Sort(Item *v, int n){
+
+    int i,j,h;
+    Item aux;
+
+    for (h = 1; h < n; h = 3*h+1);
+
+    while(h > 0){
+        h = (h-1)/3;
+        for (i = h; i < n; i++){
+            aux = v[i];
+            j = i;
+            //mudei aqui esse j >= h &&
+            while(j >= h && v[j-h].chave_t < aux.chave_t){
+                v[j] = v[j-h];
+                j -= h;
+                if(j < h)break;
+            }
+            v[j] = aux;
+        }
+    }
+
+}
+
+void Sort(Item *v, Item *c, int i, int f) {
+    if (i < f) {
+        int m = (i + f) / 2;
+        Sort(v, c, i, m);
+        Sort(v, c, m + 1, f);
+        merge(v, c, i, m, f);
+    }
+}
+
+void merge(Item *v, Item *c, int i, int m, int f) {
+    int z, iv = i, ic = m + 1;
+
+    for (z = i; z <= f; z++) {
+        c[z] = v[z];
+    }
+    z = i;
+
+    while (iv <= m && ic <= f) {
+        if (c[iv].chave_t <= c[ic].chave_t) {
+            v[z++] = c[iv++];
+        } else {
+            v[z++] = c[ic++];
+        }
+    }
+
+    while (iv <= m) {
+        v[z++] = c[iv++];
+    }
+    while (ic <= f) {
+        v[z++] = c[ic++];
+    }
+}
+
+void Merge_Sort(Item *v, int n) {
+    Item *c = malloc(sizeof(Item) * n);
+    Sort(v, c, 0, n - 1);
+    free(c);
+}
+
+int participacao_esquerda(Item *v, int LI, int LS) {
+    int aux, pivo, e = LI + 1, d = LS;
+    pivo = v[LI].chave_t;
+
+    while (e <= d) {
+        while (e <= LS && v[e].chave_t >= pivo) {
+            e++;
+        }
+        while (d > LI && v[d].chave_t < pivo) {
+            d--;
+        }
+        if (e < d) {
+            aux = v[e].chave_t;
+            v[e].chave_t = v[d].chave_t;
+            v[d].chave_t = aux;
+        }
+    }
+
+    aux = v[LI].chave_t;
+    v[LI].chave_t = v[d].chave_t;
+    v[d].chave_t = aux;
+
+    return d;
+}
+
+void quicksort_esquerda(Item *v, int LI, int LS) {
+
+    if (LI < LS) {
+        int p;
+        p = participacao_esquerda(v, LI, LS);
+        quicksort_esquerda(v, LI, p - 1);
+        quicksort_esquerda(v, p + 1, LS);
+    }
+}
+int participacao_direita(Item *v, int LI, int LS) {
+    int aux;
+    int pivo = v[LS].chave_t;
+    int e = LI, d = LS;
+
+    while (e < d) {
+        while (e < LS && v[e].chave_t > pivo) {
+            e++;
+        }
+        while (d > LI && v[d].chave_t <= pivo) {
+            d--;
+        }
+        if (e < d) {
+            aux = v[e].chave_t;
+            v[e].chave_t = v[d].chave_t;
+            v[d].chave_t = aux;
+        }
+    }
+
+    aux = v[LS].chave_t;
+    v[LS].chave_t = v[e].chave_t;
+    v[e].chave_t = aux;
+
+    return e;
+}
+
+void quicksort_direita(Item *v, int LI, int LS) {
+    if (LI < LS) {
+        int p;
+        p = participacao_direita(v, LI, LS);
+        quicksort_direita(v, LI, p - 1);
+        quicksort_direita(v, p + 1, LS);
+    }
+}
+
+int participacao_meio(Item *v, int LI, int LS) {
+    int aux, pivo, meio;
+    meio = (LI + LS) / 2;
+    pivo = v[meio].chave_t;
+
+    // Troca o pivô para a posição LI para facilitar a implementação
+    aux = v[meio].chave_t;
+    v[meio].chave_t = v[LI].chave_t;
+    v[LI].chave_t = aux;
+
+    int e = LI + 1;
+    int d = LS;
+
+    while (e <= d) {
+        while (e <= LS && v[e].chave_t >= pivo) {
+            e++;
+        }
+        while (d > LI && v[d].chave_t < pivo) {
+            d--;
+        }
+        if (e < d) {
+            aux = v[e].chave_t;
+            v[e].chave_t = v[d].chave_t;
+            v[d].chave_t = aux;
+        }
+    }
+
+    // Reposiciona o pivô na posição correta
+    aux = v[LI].chave_t;
+    v[LI].chave_t = v[d].chave_t;
+    v[d].chave_t = aux;
+
+    return d;
+}
+
+void quicksort_meio(Item *v, int LI, int LS) {
+    if (LI < LS) {
+        int p;
+        p = participacao_meio(v, LI, LS);
+        quicksort_meio(v, LI, p - 1);
+        quicksort_meio(v, p + 1, LS);
+    }
+}
+void imprimirArray(Item vetor[4]) {
+    for (int i = 0; i < 4; i++) {
+
+        printf("Chave: %d\n", vetor[i].chave_t);
+        printf("Numero Float: %.2f\n", vetor[i].elementos);
+        printf("--------------------------------\n");
+    }
+}
+
+int main(){
+
+    double tempogasto;
+    clock_t inicio,fim;
+    double media =0;
+    Item vetor[4];
+
+
+    printf("Digite a chave e o numero do vetor (tamanho 4)\n\n");
+    for (int i = 0;i < 4;i++){
+        printf("Chave: ");
+        scanf("%d",&vetor[i].chave_t);
+        printf("Numero float: ");
+        scanf("%f",&vetor[i].elementos);
+        printf("\n");
+        system("cls");
+    }
+    printf("\n\n");
+
+
+        printf("\n===========================================================");
+        printf("\n\t  Ordenacao de vetores\n");
+
+
+            /*printf("\nVetor nao ordenado:\n\n");
+            imprimirArray(vetor);
+            inicio = clock();
+            Insertion_Sort(vetor,4);
+            fim = clock();
+            tempogasto = ((double) (fim-inicio))/CLOCKS_PER_SEC;
+            media += tempogasto;
+            printf("\n\nVetor ordenado com Insertion_Sort:\n\n");
+            printf("Tempo gasto para ordenar o vetor:%f\n\n",tempogasto);
+            imprimirArray(vetor);
+                */
+            /*
+            printf("\n\n");
+            inicio = clock();
+            Buble_Sort(vetor,4);
+            fim = clock();
+            tempogasto = ((double) (fim-inicio))/CLOCKS_PER_SEC;
+            media += tempogasto;
+            printf("Vetor ordenado com Buble_Sort:\n\n");
+            printf("Tempo gasto para ordenar o vetor:%f\n\n",tempogasto);
+            imprimirArray(vetor);
+
+
+            printf("\nVetor nao ordenado:\n\n");
+            imprimirArray(vetor);
+            printf("\n\n");
+            Shell_Sort(vetor,4);
+            printf("Vetor ordenado com Shell_Sort:\n\n");
+            imprimirArray(vetor);
+
+
+            printf("\nVetor nao ordenado:\n\n");
+            imprimirArray(vetor);
+            printf("\n\n");
+            Merge_Sort(vetor,4);
+            printf("Vetor ordenado com Shell_Sort:\n\n");
+            imprimirArray(vetor);
+             */
+
+            printf("\nVetor nao ordenado:\n\n");
+            imprimirArray(vetor);
+            printf("\n\n");
+            quicksort_direita(vetor, 0, 3); // na funcao la em cima recebe um vetor tipo int e nao Item
+            printf("Vetor ordenado com Quick Sort (pivo direita):\n\n");
+            imprimirArray(vetor);
+
+
+
+
+
+    return 0;
+}
